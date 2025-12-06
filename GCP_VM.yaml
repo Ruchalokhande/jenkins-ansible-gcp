@@ -1,45 +1,44 @@
 ---
-name: Launch GCP Instance via Jenkins
-hosts: localhost
-connection: local
-gather_facts: no
+- name: Launch GCP Instance via Jenkins
+  hosts: localhost
+  connection: local
+  gather_facts: no
 
-vars:
-  gcp_project: "qwiklabs-gcp-02-6ab56494f7c6"
-  gcp_zone: "us-east1-b"
-  machine_type: "e2-medium"
-  instance_name: "rucha-jenkins-ansible-vm"
+  vars:
+    gcp_project: "qwiklabs-gcp-02-6ab56494f7c6"
+    gcp_zone: "us-east1-b"
+    machine_type: "e2-medium"
+    instance_name: "rucha-jenkins-ansible-vm"
 
-  # Jenkins SECRET FILE Credential
-  # It gets stored into env variable GCP_SA_KEY
-  gcp_credentials_file: "{{ lookup('env', 'GCP_SA_KEY') }}"
+    # Jenkins Secret File → env var name must be GCP_SA_KEY
+    gcp_credentials_file: "{{ lookup('env', 'GCP_SA_KEY') }}"
 
-tasks:
+  tasks:
 
-  - name: Create GCP Instance
-    google.cloud.gcp_compute_instance:
-      name: "{{ instance_name }}"
-      machine_type: "{{ machine_type }}"
-      disks:
-        - auto_delete: true
-          boot: true
-          initialize_params:
-            source_image: projects/debian-cloud/global/images/family/debian-11
+    - name: Create GCP instance
+      google.cloud.gcp_compute_instance:
+        name: "{{ instance_name }}"
+        machine_type: "{{ machine_type }}"
+        disks:
+          - auto_delete: true
+            boot: true
+            initialize_params:
+              source_image: projects/debian-cloud/global/images/family/debian-11
 
-      network_interfaces:
-        - network:
-            selfLink: "global/networks/default"
-          access_configs:
-            - name: External NAT
-              type: ONE_TO_ONE_NAT
+        network_interfaces:
+          - network:
+              selfLink: "global/networks/default"
+            access_configs:
+              - name: External NAT
+                type: ONE_TO_ONE_NAT
 
-      zone: "{{ gcp_zone }}"
-      project: "{{ gcp_project }}"
-      auth_kind: serviceaccount
-      service_account_file: "{{ gcp_credentials_file }}"
-      state: present
-    register: vm_info
+        zone: "{{ gcp_zone }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ gcp_credentials_file }}"
+        state: present
+      register: vm_info
 
-  - name: Display Public IP
-    debug:
-      msg: "VM launched for Ruchalokhande. Public IP: {{ vm_info.networkInterfaces[0].accessConfigs[0].natIP }}"
+    - name: Display Public IP
+      debug:
+        msg: "VM launched. Public IP: {{ vm_info.networkInterfaces[0].accessConfigs[0].natIP }}"
