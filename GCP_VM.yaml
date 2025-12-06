@@ -5,7 +5,7 @@
   gather_facts: no
   vars:
     gcp_project: "qwiklabs-gcp-00-ea09ed000360"   # Your GCP project ID
-    gcp_zone: "us-east1-b"                         # Must match allowed zone in project
+    gcp_zone: "us-east4-a"                         # Must match allowed zone in project
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
     gcp_cred_file: "{{ lookup('env', 'GCP_KEY') }}"  # Env variable for Jenkins secret
