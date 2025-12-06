@@ -5,11 +5,11 @@
   gather_facts: no
 
   vars:
-    gcp_project: "qwiklabs-gcp-00-ea09ed000360"   # Your GCP project ID
-    gcp_zone: "us-central1-c"                     # Use allowed default zone
+    gcp_project: "qwiklabs-gcp-00-ea09ed000360"  # Your Qwiklabs project
+    gcp_zone: "us-central1-c"                    # Allowed zone
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
-    gcp_cred_file: "{{ lookup('env', 'GCP_KEY') }}"  # Env variable pointing to Jenkins secret
+    gcp_cred_file: "{{ lookup('env', 'GCP_KEY') }}"  # Secret file from Jenkins
 
   tasks:
     - name: Verify GCP key file
@@ -26,7 +26,8 @@
             initialize_params:
               source_image: projects/debian-cloud/global/images/family/debian-11
         network_interfaces:
-          - network: global/networks/default
+          - network:
+              name: default
             access_configs:
               - name: External NAT
                 type: ONE_TO_ONE_NAT
