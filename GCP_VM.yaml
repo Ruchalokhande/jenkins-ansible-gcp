@@ -3,29 +3,18 @@
   hosts: localhost
   connection: local
   gather_facts: no
+
   vars:
-    gcp_project: "qwiklabs-gcp-00-ea09ed000360"
-    gcp_region: "us-east1"                       # Allowed region in Qwiklabs
+    gcp_project: "qwiklabs-gcp-00-ea09ed000360"   # Your GCP project ID
+    gcp_zone: "us-central1-c"                     # Use allowed default zone
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
-    gcp_cred_file: "{{ lookup('env', 'GCP_KEY') }}"  # Jenkins secret env variable
+    gcp_cred_file: "{{ lookup('env', 'GCP_KEY') }}"  # Env variable pointing to Jenkins secret
 
   tasks:
     - name: Verify GCP key file
       debug:
         msg: "GCP key file path is {{ gcp_cred_file }}"
-
-    - name: Get list of available zones in the region
-      google.cloud.gcp_compute_zone_info:
-        project: "{{ gcp_project }}"
-        auth_kind: serviceaccount
-        service_account_file: "{{ gcp_cred_file }}"
-        region: "{{ gcp_region }}"
-      register: zones_info
-
-    - name: Pick the first available zone
-      set_fact:
-        gcp_zone: "{{ zones_info.resources[0].name }}"
 
     - name: Create a GCP instance
       google.cloud.gcp_compute_instance:
@@ -37,12 +26,11 @@
             initialize_params:
               source_image: projects/debian-cloud/global/images/family/debian-11
         network_interfaces:
-          - network:
-              selfLink: "global/networks/default"
+          - network: global/networks/default
             access_configs:
               - name: External NAT
                 type: ONE_TO_ONE_NAT
-        zone: "{{ gcp_zone }}"             # Dynamically selected zone
+        zone: "{{ gcp_zone }}"
         project: "{{ gcp_project }}"
         auth_kind: serviceaccount
         service_account_file: "{{ gcp_cred_file }}"
