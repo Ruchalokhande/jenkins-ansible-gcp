@@ -1,4 +1,3 @@
----
 - name: Launch GCP Instance via Jenkins
   hosts: localhost
   connection: local
@@ -6,17 +5,12 @@
 
   vars:
     gcp_project: "qwiklabs-gcp-02-6ab56494f7c6"
-    gcp_region: "us-east5"       # <-- REGION
-    gcp_zone: "us-east5-a"  
-    gcp_zone: "us-east1-b"
+    gcp_zone: "us-east5-a"             # FIXED: allowed zone
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
-
-    # Jenkins Secret File → env var name must be GCP_SA_KEY
-    gcp_credentials_file: "{{ lookup('env', 'GCP_SA_KEY') }}"
+    gcp_cred_file: "/var/lib/jenkins/gcp-key.json"
 
   tasks:
-
     - name: Create GCP instance
       google.cloud.gcp_compute_instance:
         name: "{{ instance_name }}"
@@ -26,21 +20,19 @@
             boot: true
             initialize_params:
               source_image: projects/debian-cloud/global/images/family/debian-11
-
         network_interfaces:
           - network:
               selfLink: "global/networks/default"
             access_configs:
               - name: External NAT
                 type: ONE_TO_ONE_NAT
-
         zone: "{{ gcp_zone }}"
         project: "{{ gcp_project }}"
         auth_kind: serviceaccount
-        service_account_file: "{{ gcp_credentials_file }}"
+        service_account_file: "{{ gcp_cred_file }}"
         state: present
-      register: vm_info
+      register: instance_data
 
-    - name: Display Public IP
+    - name: Display Instance IP
       debug:
-        msg: "VM launched. Public IP: {{ vm_info.networkInterfaces[0].accessConfigs[0].natIP }}"
+        msg: "Instance Created. Public IP: {{ instance_data.networkInterfaces[0].accessConfigs[0].natIP }}"
