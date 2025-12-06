@@ -1,17 +1,21 @@
+---
 - name: Launch GCP Instance via Jenkins
   hosts: localhost
   connection: local
   gather_facts: no
-
   vars:
-    gcp_project: "qwiklabs-gcp-02-6ab56494f7c6"
-    gcp_zone: "us-east5-a"             # FIXED: allowed zone
+    gcp_project: "qwiklabs-gcp-00-ea09ed000360"   # Your GCP project ID
+    gcp_zone: "us-east1-b"                         # Must match allowed zone in project
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
-    gcp_cred_file: "/var/lib/jenkins/GCP_KEY"
+    gcp_cred_file: "{{ lookup('env', 'GCP_KEY') }}"  # Env variable for Jenkins secret
 
   tasks:
-    - name: Create GCP instance
+    - name: Verify GCP key file
+      debug:
+        msg: "GCP key file path is {{ gcp_cred_file }}"
+
+    - name: Create a GCP instance
       google.cloud.gcp_compute_instance:
         name: "{{ instance_name }}"
         machine_type: "{{ machine_type }}"
@@ -33,6 +37,6 @@
         state: present
       register: instance_data
 
-    - name: Display Instance IP
+    - name: Display Public IP
       debug:
         msg: "Instance Created. Public IP: {{ instance_data.networkInterfaces[0].accessConfigs[0].natIP }}"
