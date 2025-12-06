@@ -6,6 +6,8 @@
 
   vars:
     gcp_project: "qwiklabs-gcp-02-6ab56494f7c6"
+    gcp_region: "us-east5"       # <-- REGION
+    gcp_zone: "us-east5-a"  
     gcp_zone: "us-east1-b"
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
