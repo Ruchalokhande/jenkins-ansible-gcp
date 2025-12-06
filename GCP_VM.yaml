@@ -8,7 +8,7 @@
     gcp_zone: "us-east5-a"             # FIXED: allowed zone
     machine_type: "e2-medium"
     instance_name: "rucha-jenkins-ansible-vm"
-    gcp_cred_file: "/var/lib/jenkins/gcp-key.json"
+    gcp_cred_file: "/var/lib/jenkins/GCP_KEY"
 
   tasks:
     - name: Create GCP instance
