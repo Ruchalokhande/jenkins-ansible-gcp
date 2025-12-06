@@ -1,34 +1,36 @@
-- name: Launch GCP VM via Jenkins
+---
+- name: Launch VM on GCP
   hosts: localhost
   connection: local
   gather_facts: no
+
   vars:
-    gcp_project_id: "<your-gcp-project-id>"               # Replace with your project ID
-    machine_type: "e2-medium"
-    instance_name: "rucha-jenkins-vm"
-    gcp_cred_file: "/var/lib/jenkins/gcp-key.json"       # Path to Jenkins stored JSON key
+    gcp_project: "qwiklabs-gcp-02-6ab56494f7c6"
+    gcp_region: "us-east1"
+    gcp_zone: "us-east1-b"
+    gcp_credentials_file: "{{ lookup('env', 'GCP_SA_KEY') }}"
+    vm_name: "rucha-ansible-vm"
 
   tasks:
-    - name: Provision a GCP VM instance
+
+    - name: Create GCP VM instance
       google.cloud.gcp_compute_instance:
-        name: "{{ instance_name }}"
-        machine_type: "{{ machine_type }}"
+        name: "{{ vm_name }}"
+        machine_type: "e2-medium"
+        zone: "{{ gcp_zone }}"
+        project: "{{ gcp_project }}"
+        auth_kind: serviceaccount
+        service_account_file: "{{ gcp_credentials_file }}"
         disks:
           - auto_delete: true
             boot: true
             initialize_params:
-              source_image: projects/debian-cloud/global/images/family/debian-11
+              source_image: "projects/debian-cloud/global/images/family/debian-12"
         network_interfaces:
-          - network: selfLink: "global/networks/default"
-            access_configs:
-              - name: External NAT
-                type: ONE_TO_ONE_NAT
-        project: "{{ gcp_project_id }}"
-        auth_kind: serviceaccount
-        service_account_file: "{{ gcp_cred_file }}"
+          - network: "default"
         state: present
-      register: vm_info
 
-    - name: Display Public IP
-      debug:
-        msg: "VM Created. Public IP: {{ vm_info.networkInterfaces[0].accessConfigs[0].natIP }}"
+      register: vm_output
+
+    - debug:
+        msg: "VM created successfully: {{ vm_output.target_link }}"
